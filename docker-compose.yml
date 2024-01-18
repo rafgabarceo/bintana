@@ -1,0 +1,92 @@
+version: "3.8"
+services:
+  lenses:
+    image: lensesio/box:latest
+    ports:
+      - "3030:3030"
+      - "9092:9092"
+    deploy:
+      resources:
+        reservations:
+          cpus: "1"
+          memory: 4G
+    environment:
+      - ADV_HOST=127.0.0.1
+      - LICENSE=$(LFILE)
+    networks:
+      - thesis
+
+  mqtt:
+    image: docker.io/eclipse-mosquitto
+    container_name: "mqtt"
+    ports:
+      - "1883:1883"
+    volumes:
+      - "./mosquitto.conf:/mosquitto/config/mosquitto.conf"
+    networks:
+      - thesis
+
+  mongo-main:
+    image: mongo
+    command: --keyFile /keyfile.key --replSet "rs0" --bind_ip_all
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    tty: true
+    volumes:
+      - type: bind 
+        source: ./keyfile.secret
+        target: /keyfile.key
+      - type: volume
+        source: mongo_data_container
+        target: /data/db
+    networks:
+      - thesis
+
+  mongo-secondary:
+    image: mongo
+    command: --keyFile /keyfile.key --replSet "rs0" --bind_ip_all --port 27018
+    tty: true
+    ports: 
+      - "27018:27018"
+    depends_on:
+      - mongo-main
+    volumes:
+      - type: bind 
+        source: ./keyfile.secret
+        target: /keyfile.key
+      - type: volume
+        source: mongo_secondary_data_container
+        target: /data/db
+    networks:
+      - thesis
+
+  mongo-tertiary:
+    image: mongo
+    command: --keyFile /keyfile.key --replSet "rs0" --bind_ip_all --port 27019
+    tty: true
+    ports:
+      - "27019:27019"
+    depends_on:
+      - mongo-main
+    volumes:
+      - type: bind 
+        source: ./keyfile.secret
+        target: /keyfile.key
+      - type: volume
+        source: mongo_tertiary_data_container
+        target: /data/db
+    networks:
+      - thesis
+
+networks:
+  thesis:
+    name: thesis
+    driver: bridge
+volumes:
+  binlog:
+  mongo_data_container:
+  mongo_secondary_data_container:
+  mongo_tertiary_data_container:
