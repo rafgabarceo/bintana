@@ -49,6 +49,9 @@ services:
     image: mongo
     command: --keyFile /keyfile.key --replSet "rs0" --bind_ip_all --port 27018
     tty: true
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
     ports: 
       - "27018:27018"
     depends_on:
@@ -67,6 +70,9 @@ services:
     image: mongo
     command: --keyFile /keyfile.key --replSet "rs0" --bind_ip_all --port 27019
     tty: true
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
     ports:
       - "27019:27019"
     depends_on:
