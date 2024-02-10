@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   lenses:
-    image: lensesio/box:latest
+    image: lensesio/box:5.4.1
     ports:
       - "3030:3030"
       - "9092:9092"
@@ -91,6 +91,7 @@ networks:
   thesis:
     name: thesis
     driver: bridge
+
 volumes:
   binlog:
   mongo_data_container:
